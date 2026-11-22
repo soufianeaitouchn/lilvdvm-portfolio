@@ -1,0 +1,19 @@
+# Kept in the repository, left out of the deployed site. None of these is
+# loaded by any page; deployed, each would be a public download that says how
+# the site is built (or hands out a source design file) for no benefit.
+
+# Local tooling: the dev server, the media build scripts and the checks.
+dev-server.py
+scripts/
+package.json
+verify-*.mjs
+tmp-*
+shot-*.png
+*.log
+
+# Working notes and source files.
+README.md
+WORKS-NOTES.md
+text.txt
+
+_archive/

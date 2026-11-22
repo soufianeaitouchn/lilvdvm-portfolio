@@ -1,0 +1,2853 @@
+/* ---------- Fonts ---------- */
+
+@font-face {
+  font-family: "Monument Extended";
+  src: url("../fonts/HelveticaNeue/MonumentExtended-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "Helvetica Neue LV";
+  src: url("../fonts/HelveticaNeue/HelveticaNeueLight.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "Helvetica Neue LV";
+  src: url("../fonts/HelveticaNeue/HelveticaNeueBold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: "Helvetica Neue LV";
+  src: url("../fonts/HelveticaNeue/HelveticaNeueBoldItalic.woff2") format("woff2");
+  font-weight: 700;
+  font-style: italic;
+  font-display: block;
+}
+
+/* One weight only - the file carries usWeightClass 400 and no companion face -
+   so it is declared at 400 and used at 400. Asking for 700 anywhere would make
+   the browser smear the outlines into a synthetic bold instead. TrueType
+   outlines in a .ttf, hence the format hint. */
+@font-face {
+  font-family: "Bileha";
+  src: url("../fonts/bileha-font/Bileha.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+
+/* ---------- Base ---------- */
+
+:root {
+  /* 1px = the 1920px reference layout; scales down proportionally below that */
+  --u: clamp(0.5px, 100vw / 1920, 1px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: #000;
+  /* The bar is hidden, not the scrolling: wheel, touch, keyboard and the
+     smooth scroller all behave exactly as before. */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* legacy Edge */
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none; /* Chrome, Safari */
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #000;
+  color: #fff;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---------- Header ---------- */
+
+/* The wordmark and nav invert whatever is behind them, pixel by pixel: black
+   footage gives white type, a bright frame gives dark type, a colour gives its
+   opposite. Doing it as a blend rather than by sampling the video means it is
+   exact and per-letter - a bright patch passing behind one word flips only that
+   part - and it costs nothing to run.
+
+   Nothing above these in the tree isolates them (no opacity, transform, filter
+   or isolation on body or html), which is what lets the blend reach the video. */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10;
+  mix-blend-mode: difference;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-top: calc(24.752 * var(--u));
+  padding-right: calc(49.553 * var(--u));
+  padding-left: calc(54.365 * var(--u));
+}
+
+/* Logo */
+
+.logo {
+  display: inline-block;
+  /* Pure white on purpose: the difference blend above subtracts the footage
+     from this, so white is what makes the result a true inverse. */
+  color: #fff;
+  text-decoration: none;
+  font-family: "Monument Extended", sans-serif;
+  font-weight: 400;
+  font-size: calc(46.125 * var(--u));
+  line-height: 1;
+  letter-spacing: 0;
+  white-space: nowrap;
+  /* Deliberately inert on hover - nothing dims, nothing moves. What colour it
+     appears is decided by the blend against the footage, not by the pointer. */
+}
+
+.logo__mark {
+  font-family: "Helvetica Neue LV", sans-serif;
+  font-weight: 300;
+  font-size: 0.1703em;
+  vertical-align: baseline;
+  position: relative;
+  top: -3.043em;
+  letter-spacing: 0;
+}
+
+/* Nav */
+
+.nav {
+  display: flex;
+  align-items: baseline;
+  gap: calc(53.344 * var(--u));
+}
+
+.nav__link {
+  color: #fff;
+  text-decoration: none;
+  font-family: "Helvetica Neue LV", sans-serif;
+  font-weight: 300;
+  font-size: calc(21.37 * var(--u));
+
+  /* The clipping box each letter rolls inside is exactly this tall, and the
+     letter's twin is drawn exactly this far below it - so the two must be the
+     same number or the roll lands off its own mark. One shared value, used by
+     both.
+
+     It cannot be 1: a line box of one em is shorter than the font's natural
+     line, and with the box clipping its overflow the tops of the letters were
+     being cut off. */
+  --roll-line: 1.28;
+  line-height: var(--roll-line);
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+/* ---------- Nav: per-letter roll ---------- */
+
+/* Each letter is clipped to exactly one line and carries a duplicate of itself
+   one line below, drawn by text-shadow rather than by extra markup. Rolling the
+   glyph up by 100% slides that twin into the slot it just vacated, so the
+   letter appears to roll over rather than simply leave. currentColor keeps the
+   twin locked to the ink colour the footage is driving. */
+.ltr {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+}
+
+.ltr__g {
+  display: block;
+  /* One box-height below, matching the roll's travel exactly. */
+  text-shadow: 0 calc(var(--roll-line, 1.28) * 1em) 0 currentColor;
+  transform: translateY(0);
+  transition: transform 0.56s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--i) * var(--roll-stagger, 30ms));
+}
+
+@media (hover: hover) {
+  .nav__link:hover .ltr__g {
+    transform: translateY(-100%);
+  }
+}
+
+/* ---------- Page ---------- */
+
+.page {
+  min-height: 100vh;
+  background: #000;
+}
+
+/* ---------- Infos: one scroll-driven cinematic timeline ---------- */
+
+/* The track supplies the scroll distance. The stage sticks to the viewport
+   for the whole of it, so scroll position alone drives every visual state. */
+.infos {
+  --infos-screens: 7;
+  position: relative;
+  height: calc(var(--infos-screens) * 100vh);
+  height: calc(var(--infos-screens) * 100svh);
+  background: #000;
+}
+
+/* The opening frame sits behind the film as well, so a page arrived at from the
+   home page's slide shows the picture it was handed even before the film has
+   painted its first frame. */
+.infos__stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background: #000 url("../pics/videoframe0.webp") center / cover no-repeat;
+}
+
+/* Arrived by the slide from the home page: already uncovered. */
+.arrive-slide .infos__veil {
+  opacity: 0;
+}
+
+/* The opening frame is the video's own first frame, served as the poster, so
+   there is no image-to-video transition at all - it is the same pixels. */
+.infos__video {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  pointer-events: none;
+  /* Promote to its own layer up front, so the compositor does not do it
+     mid-scroll (which costs a frame, and that frame reads as a black flash). */
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Opening black. Sits below the header so the logo and nav are never affected. */
+.infos__veil {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: #000;
+  pointer-events: none;
+}
+
+/* ---------- Infos: typography ---------- */
+
+.infos__cue,
+.infos__copy {
+  position: absolute;
+  z-index: 6;
+  pointer-events: none;
+}
+
+/* At the foot of the screen, clear of the row of links across the middle. */
+.infos__cue {
+  bottom: 9vh;
+  right: 50%;
+  transform: translateX(50%);
+  margin: 0;
+  opacity: 0;
+  font-family: "Helvetica Neue LV", sans-serif;
+  font-weight: 300;
+  font-size: clamp(12px, 0.78vw, 15px);
+  letter-spacing: 0.2em;
+  color: #f2f2f2;
+  white-space: nowrap;
+}
+
+/* The cue stays simple: once it has appeared it just loops faint to full.
+   The loop lives on the inner span so it multiplies with the scroll-driven
+   opacity on the parent instead of fighting it, and it only starts once the
+   cue has arrived, so the reveal itself is a clean 0 -> 100%. */
+.infos__cue span {
+  display: inline-block;
+}
+
+.infos__cue.is-cued span {
+  animation: cue-breathe 4s ease-in-out infinite;
+}
+
+/* The cycle has to START at full, because that is where the reveal leaves the
+   cue. Beginning it at the faint end instead makes the first frame of the loop
+   snap 100% -> 35%. Same loop either way; only the phase differs. */
+@keyframes cue-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* The story is told in four steps, each one built about the row of links in
+   the middle of the screen: its number and title above the row, its paragraph
+   below it, both on the centre line - the same three bands as the Contact
+   page. The steps share one place and take turns in it, so one grid holds
+   them all. The band in the middle is the only spacing between the words and
+   the row, so the gap above the row and the gap below it are always equal. */
+.infos__copy {
+  --band: clamp(96px, 16vh, 150px);
+
+  inset: 0;
+  display: grid;
+  padding-inline: clamp(24px, 6.8vw, 130px);
+  text-align: center;
+  color: #f4f4f4;
+  /* A gentle shade under the words, so white type holds up over the lighter
+     parts of the film without a box drawn round it. */
+  text-shadow: 0 1px 18px rgba(0, 0, 0, 0.45);
+}
+
+.infos__step {
+  grid-area: 1 / 1;
+  display: grid;
+  grid-template-rows: 1fr var(--band) 1fr;
+  justify-items: center;
+  opacity: 0;
+  /* The script writes translate3d only while a step is moving and clears it
+     to none at rest, so the type is never left sitting on a composited layer
+     where it would render soft. */
+}
+
+.infos__head {
+  grid-row: 1;
+  align-self: end;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(8px, 1.4vh, 14px);
+  margin: 0;
+}
+
+.infos__num {
+  font-family: "Helvetica Neue LV", sans-serif;
+  font-weight: 400;
+  font-size: clamp(11px, 0.75vw, 13px);
+  letter-spacing: 0.24em;
+  opacity: 0.7;
+}
+
+.infos__title {
+  font-family: "Helvetica Neue LV", sans-serif;
+  font-weight: 700;
+  font-size: clamp(30px, 3.6vw, 66px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.infos__text {
+  grid-row: 3;
+  align-self: start;
+  max-width: 34ch;
+  margin: 0;
+  font-family: "Helvetica Neue LV", sans-serif;
+  font-weight: 300;
+  font-size: clamp(17px, 1.45vw, 26px);
+  line-height: 1.5;
+  letter-spacing: 0.004em;
+}
+
+.infos__text em {
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* ---------- Infos: responsive ---------- */
+
+/* On a portrait screen a centred cover crop would cut the subject out of the
+   frame entirely, so bias the framing left and move the copy to the bottom. */
+@media (max-width: 860px), (max-aspect-ratio: 1 / 1) {
+  .infos__stage {
+    background-position: 30% center;
+  }
+
+  .infos__video {
+    object-position: 30% center;
+  }
+
+  .infos__copy {
+    padding-inline: clamp(22px, 7vw, 60px);
+  }
+}
+
+/* The row stacks into a column of five down the middle on a phone, so the
+   band grows to hold it: the links and wordmark, the row's own four gaps
+   (clamp(16px, 3vh, 30px), from the centre-row rules), and air either side. */
+@media (max-width: 700px) {
+  .infos__copy {
+    --band: calc(146px + 4 * clamp(16px, 3vh, 30px));
+  }
+
+  .infos__title {
+    font-size: clamp(26px, 8vw, 40px);
+  }
+
+  .infos__text {
+    max-width: 30ch;
+    font-size: clamp(15px, 4.2vw, 19px);
+    line-height: 1.45;
+  }
+}
+
+/* ---------- Entry loader ---------- */
+
+/* Hidden by default. The inline script in the head adds .has-loader only on a
+   real arrival, so clicking between pages never flashes it up. */
+.loader {
+  display: none;
+}
+
+/* Deliberately no background of its own. The two curtains and the band between
+   them already cover the full height, and they are what the viewer sees; a
+   black on this element as well would sit behind them and stay put while they
+   drew apart, so the separation would happen against black and be invisible -
+   the page would simply appear when this node was removed. */
+.has-loader .loader {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  /* Swallows input while it is up: the page behind must not be clickable
+     through the black. */
+  pointer-events: auto;
+}
+
+/* Two halves of the same black field, meeting at the band. Each retracts
+   towards its own outer edge, so the page is uncovered outward from the middle
+   rather than simply fading away. */
+.loader__curtain {
+  flex: 1 1 0%;
+  width: 100%;
+  background: #000;
+  transform: scaleY(1);
+  /* A long ease-out rather than the ease-in-out the band uses: it should leave
+     briskly and then slow all the way to a stop, so the last of the black
+     drifts off the picture instead of arriving at the edge and halting. The
+     short delay lets the band finish closing first, which turns the reveal
+     into a sequence - the bar shuts, then the black draws back - rather than
+     two things happening at once. */
+  transition: transform 1.25s cubic-bezier(0.22, 1, 0.36, 1) 0.18s;
+}
+
+.loader__curtain--top {
+  transform-origin: center top;
+}
+
+.loader__curtain--bottom {
+  transform-origin: center bottom;
+}
+
+.loader.is-open .loader__curtain {
+  transform: scaleY(0);
+}
+
+/* The band the two halves part at. Black underneath the white, because the
+   fill only covers the part it has swept - and the rest of the band would
+   otherwise be a transparent slot showing whatever is on the page behind it. */
+.loader__band {
+  position: relative;
+  flex: 0 0 auto;
+  width: 100%;
+  height: calc(25 * var(--u));
+  background: #000;
+  overflow: hidden;
+  transform: scaleY(1);
+  transform-origin: center center;
+  transition: transform 0.42s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.loader.is-open .loader__band {
+  transform: scaleY(0);
+}
+
+/* Scaled rather than resized, so the sweep runs on the compositor. */
+.loader__fill {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+/* The words sit inside the band, on the same left rail as the wordmark.
+
+   They invert against the band rather than choosing a colour: white while the
+   black is still showing, and black the moment the white fill sweeps past
+   them. The band is its own stacking context - it clips and it scales - so the
+   blend sees exactly the two things inside it and nothing else, which is what
+   makes the switch land on the sweeping edge itself. */
+.loader__label {
+  position: absolute;
+  left: calc(54.365 * var(--u));
+  top: 50%;
+  transform: translateY(-50%);
+  color: #fff;
+  font-family: "Helvetica Neue LV", sans-serif;
+  font-weight: 300;
+  font-size: clamp(9px, 0.62vw, 12px);
+  line-height: 1;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  mix-blend-mode: difference;
+  pointer-events: none;
+}
+
+/* Once the curtains start parting the page underneath belongs to the viewer. */
+.loader.is-open {
+  pointer-events: none;
+}
+
+/* Nothing moves while the loader is up. overflow: hidden alone is not enough -
+   the smooth scroller takes the wheel and scrolls the page itself, which is
+   programmatic and sails straight past it - so the script also swallows the
+   input. This is the belt to that pair of braces. */
+.has-loader.is-loading,
+.has-loader.is-loading body {
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+}
+
+/* The contact page is laid out to fit one screen exactly and never scrolls. */
+.no-scroll,
+.no-scroll body {
+  overflow: hidden;
+  height: 100%;
+}
+
+/* The four links are held back while the scrim is up and fade in as it lifts.
+   The wordmark is deliberately not included: it is already standing in the
+   middle of the loading screen, and fading it in would mean fading in a word
+   that is visibly already there. This is the one difference between it and the
+   links either side of it. */
+.has-loader .herolinks .nav__link {
+  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.has-loader.is-loading .herolinks .nav__link {
+  opacity: 0;
+  transition: none;
+}
+
+/* ---------- The rows on a narrow screen ---------- */
+
+@media (max-width: 700px) {
+  .herolinks {
+    padding: 0 clamp(10px, 3.2vw, 20px);
+
+    /* The site's type unit bottoms out at 0.5px, so below a 960px screen the
+       words stop shrinking while the screen carries on - by 320px the five of
+       them are nearly touching. Overriding the unit locally keeps them scaling
+       down with the screen, and because both the wordmark and the links are
+       sized from it, the whole row shrinks in proportion.
+
+       The 0.5px ceiling is what makes this a no-op from 375px up: it matches
+       the global floor exactly, so nothing above that width moves. */
+    --u: clamp(0.34px, 100vw / 750, 0.5px);
+  }
+}
+
+/* ---------- Cursor ---------- */
+
+/* Only ever built for a fine pointer; the script bails out on touch before it
+   adds either element, and this keeps the styles from applying even if it did. */
+@media (any-pointer: fine) and (min-width: 1025px) {
+  /* Applied by the script, so a page without JS keeps its ordinary pointer. */
+  .has-cursor,
+  .has-cursor * {
+    cursor: none;
+  }
+
+  .cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10000;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.25s linear;
+    will-change: transform;
+  }
+
+  .cursor.is-awake {
+    opacity: 1;
+  }
+
+  .cursor-suspended .cursor,
+  .cursor-suspended .cursor * {
+    visibility: hidden !important;
+    transition: none !important;
+  }
+
+  .cursor--dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #fff;
+    mix-blend-mode: difference;
+  }
+
+  /* Difference rather than a fixed colour: the ring reads over the black
+     field, the white loading band and the footage without ever picking one. */
+  .cursor--ring {
+    width: 36px;
+    height: 36px;
+    border: 1px solid #fff;
+    border-radius: 50%;
+    mix-blend-mode: difference;
+  }
+
+  /* The pill is two elements, and has to be.
+
+     The outer one only ever carries position - the script writes a translate
+     into its transform every frame. The inner one carries the growth.
+
+     Keeping them apart is the whole point. The individual transform properties
+     (translate, rotate, scale) compose OUTSIDE the transform property, so a
+     scale of 0.4 on the same element multiplies the translation as well: a pill
+     told to sit at 871px lands at 348px instead, and then travels out to the
+     pointer as the scale animates to 1. It reads as the thing flying in from
+     the top-left corner of the screen. */
+  .cursor--hint {
+    z-index: 9999;
+    opacity: 1;
+    transition: none;
+  }
+
+  /* Painted before the dot, so the dot's difference blend inverts to black
+     over the white and reads as part of it. */
+  .cursor--hint__body {
+    display: flex;
+    align-items: center;
+    padding: 1.05em 1.7em;
+    border-radius: 999px;
+    background: #fff;
+    color: #000;
+    font-family: "Helvetica Neue LV", sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    line-height: 1;
+    letter-spacing: 0.24em;
+    text-indent: 0.24em; /* balances the trailing letter-space, so it sits centred */
+    white-space: nowrap;
+    opacity: 0;
+    transform-origin: center;
+    /* Opens from a size rather than from nothing - scaling up from zero reads
+       as a pop; from 0.4 it reads as arriving. */
+    transform: scale(0.4);
+    transition: opacity 0.22s linear, transform 0.46s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .cursor--hint.is-shown .cursor--hint__body {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ---------- Statement ---------- */
+
+/* Above the section below it, so the second row of links is genuinely behind
+   the film rather than merely dark on dark: anything the statement section
+   holds above its own top edge is covered by this. */
+.screen {
+  position: relative;
+  z-index: 2;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background: #000;
+}
+
+.screen__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  pointer-events: none;
+}
+
+/* Autoplay refused: the film is kept invisible (so no iOS play button can
+   show) and its poster sits on .screen instead, until the first touch. */
+.screen {
+  background-size: cover;
+  background-position: center;
+}
+.screen__video.is-held {
+  opacity: 0;
+}
+
+/* Background film: never show the browser's own play button over it. If
+   autoplay is refused, the poster stays and the first touch starts it. */
+.screen__video::-webkit-media-controls,
+.screen__video::-webkit-media-controls-panel,
+.screen__video::-webkit-media-controls-overlay-play-button,
+.screen__video::-webkit-media-controls-start-playback-button,
+video:not([controls])::-webkit-media-controls-start-playback-button,
+video:not([controls])::-webkit-media-controls-overlay-play-button {
+  display: none !important;
+  -webkit-appearance: none;
+  opacity: 0 !important;
+}
+
+/* ---------- Moving between pages ---------- */
+
+/* The page being left is carried up off the top of the screen and the next
+   page's opening frame comes up from below with it, as one sheet, while the
+   row of links holds still in the middle. Under the row (z-index 10) and over
+   everything else. The frame is cropped the way the next page crops its film,
+   so the hand-over is the same picture; a page with no film comes up as its
+   own black. */
+.slide-next {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+  background: #000;
+  transform: translate3d(0, 100%, 0);
+  pointer-events: none;
+}
+
+/* Between the home page and Infos the page dissolves instead of sliding: it
+   goes soft and fades to black, and the next comes up out of the blur and
+   sharpens. Only the page - the row of links is outside it and stays sharp. */
+.is-blurring main {
+  filter: blur(24px);
+  opacity: 0;
+  transition: filter 0.6s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Between the home page and Works: the film simply fades away to black on
+   the way out, and fades back up on the way home. */
+.is-fading main {
+  opacity: 0;
+  transition: opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.arrive-fade main {
+  animation: fade-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.arrive-blur main {
+  animation: blur-in 1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+@keyframes blur-in {
+  from {
+    filter: blur(24px);
+    opacity: 0;
+  }
+  to {
+    filter: none;
+    opacity: 1;
+  }
+}
+
+.slide-next img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+@media (max-width: 860px), (max-aspect-ratio: 1 / 1) {
+  .slide-next--infos img {
+    object-position: 30% center;
+  }
+}
+
+.is-sliding main,
+.is-sliding .slide-next {
+  transition: transform 1.1s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.is-sliding main {
+  transform: translate3d(0, -100vh, 0);
+}
+
+.is-sliding .slide-next {
+  transform: translate3d(0, 0, 0);
+}
+
+/* Plain white while the sheet moves: whichever page is coming, the row reads
+   over it, and the Infos row is plain white when it lands. */
+.is-sliding .herolinks--mid {
+  mix-blend-mode: normal;
+}
+
+/* For a page whose links are not in the middle: going to or from it, the row
+   cannot simply stay put, so it fades out on the way and fades in on arrival. */
+.is-sliding.slide-nav-swap .herolinks {
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+
+.arrive-nav-fade .herolinks {
+  animation: nav-arrive 0.6s ease both;
+}
+
+@keyframes nav-arrive {
+  from {
+    opacity: 0;
+  }
+}
+
+/* The centre of the first screen: the wordmark with two links either side.
+
+   Absolutely placed rather than flexed into the middle, so it is centred on the
+   screen itself and takes no part in the layout - the video keeps the whole
+   section to itself.
+
+   1fr auto 1fr is what holds the wordmark on the centre line. A plain flex row
+   would centre the row as a whole, which puts the wordmark off to one side by
+   half the difference between GALLERY WORKS and INFOS CONTACT. */
+.herolinks {
+  position: absolute;
+  inset: 0;
+  padding: 0 clamp(20px, 1.75vw, 54px);
+
+  /* A grid rather than a flex row, because this has to do two things at once:
+     hold the line on the vertical centre of the screen, and align the five
+     words on their shared baseline. align-content centres the single track;
+     align-items sits the words on the baseline within it.
+
+     Absolutely no transform here. A transform would make this its own stacking
+     context, and the links below blend with what is behind them - inside a
+     context of their own there would be nothing to blend against, and the
+     inversion would quietly stop working. */
+  display: grid;
+  grid-auto-flow: column;
+  align-content: center;
+  align-items: baseline;
+
+  /* space-between is what makes the spacing equal: whatever room is left over
+     after the five words is divided into four identical gaps, so the distance
+     from each word to the next is the same number at every screen width. The
+     two ends land on the gutters. */
+  justify-content: space-between;
+
+  /* The box covers the whole screen in order to centre its contents, so it
+     must not swallow the pointer everywhere else. */
+  pointer-events: none;
+}
+
+.herolinks > * {
+  pointer-events: auto;
+}
+
+/* Compact navigation labels, with a readable minimum on smaller screens. Set
+   small and quiet against the film - about 10px on a 1920 screen - so the row
+   reads as a caption across the picture rather than a menu over it. */
+.herolinks .nav__link {
+  font-size: clamp(9px, 0.536vw, 11px);
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* The wordmark in the row, scaled down with the links so the two keep their
+   proportion: about 142px across on a 1920 screen. */
+.herolinks .herolinks__logo {
+  font-size: calc(30 * var(--u));
+}
+
+/* The inversion is per item rather than on the row as a whole - that is what
+   lets one of them opt out while the rest carry on inverting. */
+.herolinks .nav__link,
+.herolinks .herolinks__logo {
+  mix-blend-mode: difference;
+}
+
+.herolinks > * {
+  white-space: nowrap;
+}
+
+/* The wordmark is the third of five, which is what holds it on the centre
+   line. It is exact only if the two words on its left measure the same as the
+   two on its right, so each flanking pair is set to a shared width - the wider
+   of the two, measured once and written to these variables by the script. A
+   pair that has not been measured yet simply keeps its natural width, which is
+   within a few pixels anyway. */
+.herolinks .nav__link:nth-child(1),
+.herolinks .nav__link:nth-child(5) {
+  width: var(--outer-w, auto);
+}
+
+.herolinks .nav__link:nth-child(2),
+.herolinks .nav__link:nth-child(4) {
+  width: var(--inner-w, auto);
+}
+
+/* Each pair is set flush against the outside, so widening one to match the
+   other adds its slack on the inside, where the gaps absorb it. */
+.herolinks .nav__link:nth-child(1) {
+  text-align: left;
+}
+
+.herolinks .nav__link:nth-child(5) {
+  text-align: right;
+}
+
+.herolinks .nav__link:nth-child(2) {
+  text-align: right;
+}
+
+.herolinks .nav__link:nth-child(4) {
+  text-align: left;
+}
+
+/* The wordmark keeps its own type; only the header's fixed placement is undone. */
+.herolinks__logo {
+  position: static;
+}
+
+/* ---------- Home gallery: phone media library ---------- */
+
+@media (max-width: 760px), (hover: none) {
+
+  .home-gallery__item {
+    aspect-ratio: 1;
+    border: 0;
+    border-radius: 0;
+  }
+}
+/* ---------- Gallery: the wall (js/gallery-wall.js) ---------- */
+
+/* Every photograph at once, in columns of uneven tiles that keep each one's
+   own shape. The page scrolls; the nav row holds the middle as everywhere. */
+.wall-page {
+  padding: clamp(84px, 13vh, 150px) clamp(12px, 1.75vw, 54px) clamp(84px, 13vh, 150px);
+  color: #fff;
+  font-family: "Helvetica Neue LV", sans-serif;
+}
+
+/* Named for screen readers; the page itself says it with pictures. */
+.wall-page__title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.wall {
+  display: flex;
+  align-items: flex-start;
+  gap: clamp(6px, 0.55vw, 12px);
+}
+
+.wall__col {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(6px, 0.55vw, 12px);
+}
+
+.wall__tile {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background: #0b0b0b;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.wall__tile img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transform: scale(1.03);
+  transition: opacity 0.7s ease, transform 1.1s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.4s ease;
+}
+
+.wall__tile.is-loaded img {
+  opacity: 1;
+  transform: none;
+}
+
+/* On a pointer that hovers, the others step back as one is singled out. */
+@media (hover: hover) {
+  .wall:hover .wall__tile.is-loaded img {
+    filter: brightness(0.55);
+  }
+
+  .wall .wall__tile.is-loaded:hover img {
+    filter: none;
+    transform: scale(1.025);
+  }
+}
+
+.wall__tile:focus-visible {
+  outline: 1px solid #fff;
+  outline-offset: 3px;
+}
+
+/* ---------- The viewer: one photograph, full screen ---------- */
+
+.viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 20; /* over the nav row (10), under the loader and the slide */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.96);
+  color: #fff;
+  font-family: "Helvetica Neue LV", sans-serif;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  touch-action: none;
+}
+
+.viewer[hidden] {
+  display: none;
+}
+
+.viewer.is-open {
+  opacity: 1;
+}
+
+.viewer__frame {
+  position: absolute;
+  inset: clamp(56px, 9vh, 96px) clamp(12px, 4vw, 80px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.viewer__img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-drag: none;
+  transform: scale(0.97);
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.viewer.is-open .viewer__img {
+  transform: none;
+}
+
+.viewer__btn {
+  padding: 10px 4px;
+  border: 0;
+  background: none;
+  color: rgba(255, 255, 255, 0.72);
+  font: inherit;
+  font-size: clamp(10px, 0.6vw, 12px);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.25s ease;
+}
+
+.viewer__btn:hover,
+.viewer__btn:focus-visible {
+  color: #fff;
+}
+
+.viewer__btn:focus-visible {
+  outline: 1px solid #fff;
+  outline-offset: 2px;
+}
+
+.viewer__close {
+  position: absolute;
+  top: clamp(12px, 3vh, 32px);
+  right: clamp(12px, 1.75vw, 54px);
+}
+
+.viewer__foot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: clamp(10px, 3vh, 30px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(28px, 4vw, 64px);
+}
+
+.viewer__count {
+  margin: 0;
+  min-width: 7ch;
+  text-align: center;
+  font-size: clamp(10px, 0.6vw, 12px);
+  letter-spacing: 0.16em;
+  white-space: pre;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wall__tile img,
+  .viewer,
+  .viewer__img {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* ---------- Call to action ---------- */
+
+.cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(14px, 3.4vw, 66px);
+  color: #fff;
+  text-decoration: none;
+  max-width: 100%;
+
+  /* Held at the foot of the section, and this does not starve the film above
+     it: flex resolves growing first and hands an auto margin only what is left
+     over, so the film takes its room and this takes the remainder.
+
+     It matters wherever the film has hit its ceiling rather than the column's
+     end - on a tall phone it stops well short of filling the column, and
+     without this the whole thing bunched at the top with the invitation
+     stranded halfway up the screen. */
+  margin-top: auto;
+}
+
+/* ---------- Contact ---------- */
+
+/* One screen in three bands: what this is and how to reach me above, the form
+   below, and between them a band left clear for the row of links, which sits
+   in the middle of the screen as it does on every page. The top block hugs the
+   band from above and the form hangs from it below, so the two read as one
+   composition around the row rather than as a page with a menu over it.
+
+   The band is sized to the row: one line on a wide screen, a stacked column of
+   five on a phone. A screen too short for all three simply scrolls. */
+.contact {
+  --c-line: rgba(255, 255, 255, 0.28);
+  --c-line-on: #fff;
+  --c-mute: rgba(255, 255, 255, 0.55);
+  --c-ink: #fff;
+  --band: clamp(72px, 12vh, 120px);
+
+  display: grid;
+  grid-template-rows: 1fr var(--band) 1fr;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: 0 clamp(20px, 6vw, 110px);
+  color: var(--c-ink);
+  background: #000;
+}
+
+.contact__top,
+.cform {
+  width: min(100%, 980px);
+  justify-self: center;
+}
+
+/* ---- above the row: the invitation, and the direct ways in ---- */
+
+.contact__top {
+  grid-row: 1;
+  align-self: end;
+  padding: clamp(28px, 6vh, 64px) 0 clamp(14px, 2.4vh, 26px);
+  text-align: center;
+}
+
+.contact__title {
+  margin: 0;
+  font-family: "Helvetica Neue LV", sans-serif;
+  font-weight: 700;
+  font-size: clamp(32px, 4.6vw, 84px);
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  text-transform: none;
+}
+
+.contact__title span {
+  display: block;
+}
+
+/* ---- the entrance ---- */
+
+/* Once the page is handed over, the headline rises in a line at a time, the
+   ways in follow, then the form. Held invisible until then. An animation
+   rather than a transition, so it plays however soon the page is ready. */
+.contact__title span,
+.contact__ways li {
+  opacity: 0;
+}
+
+.is-form-ready .contact__title span,
+.is-form-ready .contact__ways li {
+  animation: contact-rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.is-form-ready .contact__title span:nth-child(2) { animation-delay: 0.08s; }
+.is-form-ready .contact__ways li { animation-duration: 0.7s; animation-name: contact-fade; }
+.is-form-ready .contact__ways li:nth-child(1) { animation-delay: 0.3s; }
+.is-form-ready .contact__ways li:nth-child(2) { animation-delay: 0.36s; }
+.is-form-ready .contact__ways li:nth-child(3) { animation-delay: 0.42s; }
+
+@keyframes contact-rise {
+  from {
+    opacity: 0;
+    transform: translateY(0.35em);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes contact-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Email first and largest: it is the one way in that always works, the form
+   included - which says so itself while it has nowhere to send. */
+.contact__ways {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px clamp(18px, 2.4vw, 40px);
+  margin: clamp(16px, 2.6vh, 28px) 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: "Helvetica Neue LV", sans-serif;
+  font-weight: 400;
+  font-size: clamp(11px, 0.78vw, 14px);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.contact__ways a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--c-ink);
+  text-decoration: none;
+  opacity: 0.8;
+  transition: opacity 0.25s ease;
+}
+
+.contact__ways a:hover,
+.contact__ways a:focus-visible {
+  opacity: 1;
+}
+
+/* A line drawn under the link from the left on hover, and taken away to the
+   right when the pointer leaves - it never simply blinks on and off. */
+.contact__ways a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -5px;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 0.45s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.contact__ways a:hover::after,
+.contact__ways a:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+.contact__ways svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.contact__mail {
+  border-bottom: 1px solid var(--c-line);
+  padding-bottom: 2px;
+}
+
+/* ---- below the row: the form ---- */
+
+/* Name and email side by side, the message across both, and the send row under
+   it - four parts on a two-column grid, so every edge lines up. */
+.cform {
+  grid-row: 3;
+  align-self: start;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(10px, 1.8vh, 18px) clamp(18px, 2.4vw, 40px);
+  padding: clamp(14px, 2.4vh, 26px) 0 clamp(28px, 6vh, 64px);
+  /* Held back until the page has settled; the delay lives on the ready state. */
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.is-form-ready .cform {
+  opacity: 1;
+  transition-delay: 0.5s;
+}
+
+.cform__item--area,
+.cform__foot {
+  grid-column: 1 / -1;
+}
+
+/* The bot trap: out of sight and out of the layout, but still in the form. */
+.cform__trap {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* The field. The script marks it active while focused and filled while it
+   holds something; either way the line and the label brighten. The label and
+   the line that explains an error share the top row - label on the left,
+   message on the right - so a message never pushes the form about. */
+.cform__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 8px 14px;
+  padding: 0 0 10px;
+  border-bottom: 1px solid var(--c-line);
+  transition: border-color 0.28s ease-in-out;
+}
+
+.cform__item > .cform__input {
+  grid-column: 1 / -1;
+}
+
+.cform__item:hover,
+.cform__item.is-filled {
+  border-color: rgba(255, 255, 255, 0.55);
+}
+
+/* Focus draws a white line along the field from the left, over the grey one. */
+.cform__item::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--c-line-on);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.55s cubic-bezier(0.65, 0, 0.35, 1), background-color 0.28s ease;
+}
+
+.cform__item.is-active::after,
+.cform__item.is-error::after {
+  transform: scaleX(1);
+}
+
+.cform__error {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  margin: 0;
+  color: #ff7a8a;
+  font-family: "Helvetica Neue LV", sans-serif;
+  font-size: clamp(10px, 0.7vw, 12px);
+  letter-spacing: 0.04em;
+  text-align: right;
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.cform__item.is-error .cform__error {
+  opacity: 1;
+  transform: none;
+}
+
+.cform__label {
+  color: var(--c-mute);
+  font-family: "Helvetica Neue LV", sans-serif;
+  font-weight: 400;
+  font-size: clamp(10px, 0.7vw, 12px);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition: color 0.28s ease-in-out;
+}
+
+.cform__item:hover .cform__label,
+.cform__item.is-active .cform__label,
+.cform__item.is-filled .cform__label {
+  color: var(--c-ink);
+}
+
+.cform__input {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--c-ink);
+  font-family: "Helvetica Neue LV", sans-serif;
+  font-weight: 300;
+  font-size: clamp(15px, 1.15vw, 20px);
+  line-height: 1.3;
+}
+
+.cform__input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.cform__input--area {
+  height: clamp(56px, 11vh, 110px);
+  resize: none;
+  overflow-y: auto;
+}
+
+/* A field the script found empty or malformed on sending: the drawn line and
+   the label turn the error colour. */
+.cform__item.is-error::after {
+  background: #ff7a8a;
+}
+
+.cform__item.is-error .cform__label {
+  color: #ff7a8a;
+}
+
+/* The send row: what the form has to say on the left, the button on the right. */
+.cform__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 4px;
+}
+
+.cform__note {
+  margin: 0;
+  color: var(--c-mute);
+  font-family: "Helvetica Neue LV", sans-serif;
+  font-size: clamp(11px, 0.78vw, 14px);
+  line-height: 1.35;
+  transition: color 0.25s ease;
+}
+
+.cform__note[data-kind="error"] {
+  color: #ff7a8a;
+}
+
+.cform__note[data-kind="success"] {
+  color: var(--c-ink);
+}
+
+/* Solid white at rest, outlined on hover, pressed in a touch on click. While
+   sending it holds still with a spinner; once sent it says so. */
+.cform__submit {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 9em;
+  padding: 14px 34px;
+  border: 1px solid var(--c-ink);
+  border-radius: 999px;
+  background: var(--c-ink);
+  color: #000;
+  font-family: "Helvetica Neue LV", sans-serif;
+  font-weight: 700;
+  font-size: clamp(11px, 0.78vw, 13px);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.3s ease, color 0.3s ease, transform 0.15s ease;
+}
+
+.cform__submit:hover,
+.cform__submit:focus-visible {
+  background: transparent;
+  color: var(--c-ink);
+}
+
+.cform__submit:active {
+  transform: scale(0.97);
+}
+
+.cform__submit[disabled] {
+  cursor: default;
+}
+
+.cform__spinner {
+  display: none;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: cform-spin 0.7s linear infinite;
+}
+
+.cform__submit[data-state="sending"] {
+  background: transparent;
+  color: var(--c-ink);
+}
+
+.cform__submit[data-state="sending"] .cform__spinner {
+  display: inline-block;
+}
+
+@keyframes cform-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Without motion the page simply appears, already in place. */
+@media (prefers-reduced-motion: reduce) {
+  .contact__title span,
+  .contact__ways li {
+    opacity: 1;
+    animation: none !important;
+  }
+
+  .contact__ways a::after,
+  .cform__item::after {
+    transition: none;
+  }
+}
+
+/* ---- narrow screens ---- */
+
+/* The row stacks into a column of five down the middle here, so the band
+   between the two halves grows to hold it: the four links and the wordmark,
+   the row's own four gaps (clamp(16px, 3vh, 30px), from the centre-row rules),
+   and a little air either side. Everything else tightens to share what is
+   left of a phone's height. */
+@media (max-width: 700px) {
+  .contact {
+    --band: calc(106px + 4 * clamp(16px, 3vh, 30px));
+  }
+
+  .contact__top {
+    padding: 16px 0 8px;
+  }
+
+  .contact__ways {
+    gap: 8px 18px;
+    margin-top: 14px;
+  }
+
+  /* One field to a row on a phone: two side by side leaves each too narrow to
+     read what is typed into it. */
+  .cform {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 8px 0 16px;
+  }
+
+  .cform__input--area {
+    height: clamp(44px, 7vh, 72px);
+  }
+
+  .cform__submit {
+    padding: 12px 24px;
+  }
+}
+
+/* A short phone (an iPhone SE and its like): the stacked fields have to fit
+   under the column of links in what is left of 667px, so every gap gives a
+   little. Measured to fit 375x667 with room to spare. */
+@media (max-width: 700px) and (max-height: 720px) {
+  .contact__title {
+    font-size: clamp(26px, 7.4vw, 32px);
+  }
+
+  .contact__ways {
+    margin-top: 10px;
+  }
+
+  .cform {
+    gap: 8px;
+    padding: 6px 0 6px;
+  }
+
+  .cform__item {
+    gap: 4px 12px;
+    padding-bottom: 6px;
+  }
+
+  .cform__input--area {
+    height: 36px;
+  }
+
+  .cform__submit {
+    padding: 10px 22px;
+  }
+}
+
+/* ---------- Gallery page: the grid ---------- */
+
+/* Black ground, every piece in one even 4:3 grid scrolling under the row of
+   links in the middle of the screen. The only type is the site's small
+   uppercase captions: the pictures are the page. */
+.gallery {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: clamp(64px, 14vh, 140px) clamp(16px, 4vw, 72px) clamp(64px, 14vh, 140px);
+  background: #000;
+  color: #fff;
+}
+
+/* Four across on a computer, three on a tablet, two on a phone. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(8px, 1.2vw, 20px);
+}
+
+@media (max-width: 1100px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* A tile: every one the same 4:3 frame, its picture filling it. It rises into
+   place the first time it comes on screen. */
+.grid__piece {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: #111;
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+  translate: 0 50px;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), translate 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--in-delay, 0ms);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.grid__piece[hidden] {
+  display: none;
+}
+
+.grid__piece:focus-visible {
+  outline: 1px solid #fff;
+  outline-offset: 4px;
+}
+
+/* Held a touch dim at rest, so the one under the pointer can lift. */
+.grid__piece img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.grid__piece img {
+  filter: brightness(0.8);
+  transition: filter 0.45s ease, transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.grid__piece:hover img,
+.grid__piece:focus-visible img {
+  filter: brightness(1);
+  transform: scale(1.04);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grid__piece {
+    opacity: 1;
+    translate: none;
+    transition: none;
+  }
+}
+
+/* ---------- Gallery: one icon ---------- */
+
+.icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: clamp(62px, 5.4vw, 86px);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 5px 6px;
+  border-radius: 4px;
+
+  cursor: grab;
+  /* The browser must not claim the gesture: a drag here is ours, and a scroll
+     that starts on an icon would otherwise take it away mid-movement. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+
+  /* Position is written by the script every frame of a drag. Nothing else may
+     set a transform here or the two would fight. */
+  will-change: transform;
+  transition: background-color 0.2s ease;
+}
+
+.icon:hover,
+.icon:focus-visible {
+  background: rgba(255, 255, 255, 0.11);
+  outline: none;
+}
+
+.icon:focus-visible {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
+/* ---------- Gallery: the viewer ---------- */
+
+/* The desk is never locked now. Windows float over it, so the icons behind
+   them stay reachable and the page still scrolls where it needs to. */
+/* A finger, not a pointer. Icons are not dragged here - they are only opened -
+   so the browser keeps the gesture and the desk scrolls from anywhere on it,
+   including from an icon. Handing every touch to the script instead meant a
+   swipe that began on an icon moved the icon rather than the page, and with
+   thirty of them there was little left to scroll from. */
+@media (hover: none) {
+  .icon {
+    width: clamp(78px, 24vw, 108px);
+    touch-action: auto;
+    cursor: pointer;
+  }
+}
+
+/* ---------- Gallery: a picture on a phone ---------- */
+
+/* display below would override the browser's own rule for the hidden
+   attribute, so this puts it back. Without it the sheet is never hidden at
+   all - a full-screen layer, invisible only because its opacity is zero,
+   swallowing every tap meant for an icon. */
+.sheet[hidden] {
+  display: none;
+}
+
+.sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  /* Barely anything: the blur beneath is what separates the picture from the
+     desk, and painting solid black over it would hide the very thing that
+     was asked to show through. */
+  background: rgba(0, 0, 0, 0.28);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  /* The gesture is ours: the page must not take it for a scroll partway
+     through a drag. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.sheet.is-open {
+  opacity: 1;
+}
+
+/* Nothing anywhere is selectable while a window is being moved or sized. */
+.dragging,
+.dragging * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  cursor: inherit;
+}
+
+/* ---------- Works: a row of stills on one line ---------- */
+
+/* One screen. The page itself has no length: the strip runs endlessly, so
+   there is nothing for a scrollbar to describe and nothing below to reach. */
+.works {
+  /* The two measures the whole composition is built from - the black between
+     any two panels, and the black above and below the row. Declared once each
+     and used nowhere else, so the rhythm cannot drift.
+
+     The gap is a whole number of pixels on purpose. A fractional one is still
+     a single value and still perfectly equal in the layout, but the screen has
+     no fractional pixels to paint it on: a 13.68px gap comes out 13px between
+     one pair and 14px between the next, depending on where each panel's edge
+     happens to fall. Whole pixels leave nothing to round, and every gap in the
+     row paints identically. */
+  --gap: 14px;
+  --edge: clamp(12px, 2vh, 24px);
+
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+  background: #000;
+}
+
+/* The stage is the eye. The script arranges the panels on a shallow arc, and
+   the perspective is what turns that arc into foreshortening - panels growing
+   towards the ends of the row and falling away through the middle - rather
+   than a flat fan of parallelograms. */
+.works__stage {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+
+  /* The browser is told up front that it will not be scrolling this, so it
+     never waits to find out whether a touch was meant for it. Without this a
+     finger can spend the first frames of a swipe in the browser gesture
+     handling instead of ours, which is felt as the row not setting off. */
+  touch-action: none;
+  /* In viewport widths rather than pixels, for the same reason the arc is
+     described by an angle: the depth of the curve and the strength of the
+     perspective have to scale together, or the composition changes shape with
+     the window. The bounds only stop it going strange on a phone or on a very
+     wide display. */
+  perspective: clamp(560px, 80vw, 1600px);
+  perspective-origin: 50% 50%;
+}
+
+/* The grain and the grade now live in the picture files themselves.
+
+   They used to be a blended noise layer over the row and a filter on each
+   picture, and both were free to write and expensive to run. A blend mode
+   over the row means the compositor cannot simply move the panels: it has to
+   re-composite the whole stage every frame. A filtered element re-rasterises
+   whenever its scale changes - and every panel's scale changes continuously,
+   because that is what travelling along the arc does. Twenty-four of them at
+   once was what made the scrolling stutter.
+
+   Baked into the files the result is identical and costs nothing to draw. */
+
+/* Moved only by the wheel, and only while it is turning: the strip carries the
+   scrolling it has been given and holds still the moment that stops. It is
+   wound on by exactly one sequence whenever it has travelled that far, landing
+   on an identical arrangement - so it can run in either direction for as long
+   as anyone cares to keep going. */
+.works__track {
+  display: flex;
+  /* Centred rather than stretched, so the panels sit in the middle of the
+     screen with the same air above them as below. */
+  align-items: center;
+
+  /* The one measure between every pair of panels in the row. Nothing else in
+     this block puts a margin on a panel and nothing positions one by hand, so
+     every gap is identical by construction rather than by care. */
+  gap: var(--gap);
+
+  height: 100%;
+  width: max-content;
+  will-change: transform;
+
+  /* Without this the track would flatten its children, and every panel would
+     face straight ahead however far the script has turned it. */
+  transform-style: preserve-3d;
+
+  /* And with it, the track has to be taken out of the pointer's way.
+
+     Every panel is pushed back behind the plane of the screen, so that none
+     of them ever stands in front of it. The track's own box stays on that
+     plane - and inside a preserve-3d context the browser sorts by depth, so
+     the track ends up in front of every panel it contains. The pointer lands
+     on the track, the panel underneath is never entered, and :hover on it can
+     never fire.
+
+     It has nothing to catch in any case: the wheel is taken on the window and
+     the touch on the stage. The panels take it back below. */
+  pointer-events: none;
+}
+
+.panel {
+  position: relative;
+  flex: 0 0 auto;
+
+  /* Taken back from the track above, which had to give it up. */
+  pointer-events: auto;
+
+  /* One width for every panel - narrow, and the same all the way along. It
+     scales with the screen rather than being fixed, so the same number stays
+     in view whatever the display, but the floor and ceiling stop them turning
+     into slivers on a phone or slabs on a very wide monitor. */
+  /* Rounded for the same reason as the gap: the panel edge is where the gap
+     beside it starts, so a fractional width would put the rounding back. The
+     unrounded value is declared first, for anything too old to know round(). */
+  width: clamp(132px, 15.5vw, 240px);
+  width: round(clamp(132px, 15.5vw, 240px), 1px);
+  height: calc(100% - 2 * var(--edge));
+  margin: 0;
+
+  /* The picture and its title, one above the other. The figure is what the
+     script turns, so putting the title inside it is what gives the title the
+     arc: it is carried by the same transform rather than tracking it. */
+  display: flex;
+  flex-direction: column;
+
+  /* Promoted once, and then only ever moved. Everything that used to force a
+     repaint as a panel travelled - the filter, the blurred shadow, the blend
+     above it - has been taken off it, so the compositor can hand the whole
+     row to the GPU and simply move the pieces about.
+
+     Deliberately no will-change here. It would pin all twenty-four panels into
+     layers of their own and hold them there - on a phone, at three device
+     pixels to one, that is tens of megabytes of texture for a row of which
+     seven are ever on screen, and running the GPU out of memory is its own kind
+     of stutter. Containment lets the browser skip the ones it cannot see
+     instead. It sits on the frame rather than here, now that the figure has a
+     title under it that must not be clipped away. */
+
+  /* The turn itself is written by the script, every frame, from where the
+     panel has reached on the screen - so nothing here may set a transform of
+     its own. It turns about its own centre, which leaves the slot the row
+     spaced it into exactly where it was: the gap is a property of the layout,
+     and the layout never moves. */
+  transform-origin: 50% 50%;
+  backface-visibility: hidden;
+
+  /* Held back until the page is handed over, then brought up in order. */
+  opacity: 0;
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--i, 0) * 45ms);
+}
+
+.is-loaded .panel {
+  opacity: 1;
+}
+
+/* The rectangle. It takes whatever height the title leaves, so the panel as a
+   whole stays exactly as tall as it was and the row still fits the screen
+   between its margins.
+
+   The clipping lives here rather than on the figure, because the figure now
+   holds the title too and that must not be cropped. */
+/* Arriving: each rectangle and its title start below the screen and rise into
+   place, staggered from the left by the script. On what is inside the panel,
+   not the panel - the strip rewrites the panel's own transform every frame. */
+.works-enter .panel > * {
+  translate: 0 110vh;
+}
+
+.panel__frame {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  background: #fff;
+  contain: paint;
+}
+
+.panel__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center center;
+}
+
+.panel__frame > .media-picture,
+.project-overlay__frame > .media-picture {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.media-picture > .panel__img {
+  position: absolute;
+  inset: 0;
+}
+
+/* The title, under its own rectangle. Small and quiet: it names the work
+   without competing with it. A title too long for the panel trails off rather
+   than wrapping and pushing the picture shorter than its neighbours. */
+.panel__cap {
+  flex: 0 0 auto;
+  margin-top: clamp(7px, 0.9vh, 13px);
+  color: rgba(255, 255, 255, 0.66);
+  font-family: "Helvetica Neue LV", sans-serif;
+  font-weight: 300;
+  font-size: clamp(8px, 0.58vw, 11px);
+  line-height: 1.3;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* A shadow drawn into the edges of every panel, which lifts off the one being
+   pointed at. This is where the depth comes from: the panel cannot actually
+   come forward without moving, so instead it comes out of shadow, and reads as
+   nearer for it. Drawn inside the panel's own box, so it changes no geometry
+   and nothing beside it moves. */
+.panel__frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  /* Flat, not a blurred shadow. A blur has to be painted, and painted again
+     every time the panel it sits in changes size - which, on the arc, is
+     constantly. A plain wash is one colour and the compositor can fade it
+     without redrawing anything.
+
+     Light, now that it sits on white rather than on a photograph: enough to
+     hold the panels a shade off true white, so that lifting it under the
+     pointer still reads as one of them coming forward. It is the whole of the
+     hover effect here - there is no longer a picture to zoom. */
+  background: rgba(0, 0, 0, 0.14);
+  opacity: 1;
+  transition: opacity 0.52s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Only while the row is standing still. A strip sliding along under a still
+   pointer keeps handing it one panel after another, and each would take the
+   zoom for the moment it passed underneath - which reads as the pictures
+   flinching as they go by, not as anything the reader did. The script marks
+   the row as moving and clears it the moment the movement settles, so the
+   panel actually under the pointer takes the zoom back on its own.
+
+   Which panel that is comes from the script rather than from :hover. The
+   browser only reconsiders :hover when the mouse moves - not when the page
+   moves under a mouse that is holding still - so after a scroll it still
+   pointed at whichever panel had since slid away. */
+@media (hover: hover) {
+  .works__track:not(.is-moving) .panel.is-hovered .panel__frame::after {
+    opacity: 0;
+  }
+}
+
+/* ---------- Works: the projects in orbit (js/orbit.js) ---------- */
+
+/* The strip's layout is undone: every card is placed by the script, on a
+   ball around the logo, and only its transform, opacity and stacking change
+   from frame to frame. The stage is its own stacking context, so however
+   the cards sort among themselves they all stay under the row of links. */
+.works--orbit .works__stage {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  perspective: none;
+  touch-action: none;
+}
+
+.works--orbit .works__track {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+  gap: 0;
+  transform-style: flat;
+}
+
+.works--orbit .panel {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  flex: none;
+  margin: 0;
+  opacity: 0;
+  transition: none;
+  transform-origin: 50% 50%;
+  will-change: transform, opacity;
+  cursor: pointer;
+}
+
+.works--orbit .panel__frame {
+  position: absolute;
+  inset: 0;
+  background: #111;
+}
+
+/* No titles under the cards and no wash over them: the pictures stand
+   solid, and the name of the one in focus is given at the foot instead. */
+.works--orbit .panel__cap,
+.works--orbit .panel__frame::after {
+  display: none;
+}
+
+/* Focus: once a card has been pointed at for a moment, every other card
+   eases down to a dark grey and the one in focus keeps its colour - one
+   project lit, the rest gone quiet. A filter repaints, so it is only ever
+   switched by this one class, never written frame by frame. */
+.works--orbit .panel__frame {
+  transition: filter 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.works--orbit .works__track.has-focus .panel:not(.is-hovered) .panel__frame {
+  filter: grayscale(1) brightness(0.42);
+}
+
+/* The name of the project in focus, at the foot of the screen, decoded by
+   js/scramble.js as it changes. Shown only while a card has focus. */
+.orbit-label {
+  position: fixed;
+  bottom: clamp(16px, 3vh, 30px);
+  z-index: 11;
+  margin: 0;
+  color: #fff;
+  font-family: "Helvetica Neue LV", sans-serif;
+  font-weight: 300;
+  font-size: clamp(9px, 0.6vw, 11px);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1), transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.orbit-label--name {
+  left: 50%;
+  translate: -50% 0;
+}
+
+.works--orbit.is-open .orbit-label.is-shown {
+  opacity: 1;
+  transform: none;
+}
+
+.works--orbit.is-leaving .orbit-label {
+  opacity: 0;
+  transition-delay: 0s;
+  transition-duration: 0.35s;
+}
+
+.project-open .orbit-label {
+  opacity: 0;
+  transition-delay: 0s;
+}
+
+/* The project's clip, played over the still while the card is pointed at. */
+.panel__clip {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+}
+
+.panel__clip.is-playing {
+  opacity: 1;
+}
+
+/* Pointing at a panel changes only how it is lit. It keeps its width, its
+   place in the row and its lean, so no gap changes and no neighbour moves -
+   the panel does not come forward, it comes into focus, while the rest of the
+   row stays exactly as it was. */
+/* ---------- Works: the navigation floating over it ---------- */
+
+/* Fixed to the screen rather than carried by the track, so the panels drift
+   behind it and it reads as a layer of its own.
+
+   White type would now be white on white: the panels are white, and the row
+   passes straight across them. So it inverts what is behind it instead, the
+   way the wordmark does over the film on the home page - black where it
+   crosses a panel, white where it crosses the gaps between them, and correct
+   at every position without anything having to know where the panels are.
+
+   The blend is on the row and not on each word, and it has to be. This is a
+   fixed element with a z-index, which makes it a stacking context of its own -
+   a word blending inside it would find nothing behind it but the row, and the
+   inversion would quietly do nothing. The row itself has the page as its
+   backdrop. */
+/* Pinned to the top and given the small viewport height rather than stretched
+   to the bottom edge. On a phone the browser's own bars slide away and back as
+   the page scrolls, and a box held to both edges grows and shrinks with them -
+   so the row centred in it drifted up and down under the thumb. The small
+   viewport height does not change while scrolling, so the row holds still, and
+   it is the same middle the Infos and Contact pages lay their words around. */
+.herolinks--mid {
+  position: fixed;
+  inset: 0 0 auto;
+  height: 100vh;
+  height: 100svh;
+  z-index: 10;
+  color: #fff;
+  mix-blend-mode: difference;
+}
+
+.herolinks--mid .nav__link,
+.herolinks--mid .herolinks__logo {
+  color: inherit;
+  mix-blend-mode: normal;
+}
+
+/* Plain white rather than inverted, for a page whose film is mostly a middle
+   grey: white inverted against middle grey is middle grey, and the words all
+   but vanish. */
+.herolinks--plain {
+  mix-blend-mode: normal;
+}
+
+/* On a phone the five words will not go across the screen, so the row becomes
+   a column down the middle of it - the same way the home page's first screen
+   stacks.
+
+   It has to sit here, after the rules above rather than up with the other
+   narrow-screen rules, because it overrides them at the same specificity and
+   the later one is the one that wins. */
+@media (max-width: 700px) {
+  .herolinks--mid {
+    grid-auto-flow: row;
+    justify-content: center;
+    justify-items: center;
+    align-items: center;
+    gap: clamp(16px, 3vh, 30px);
+  }
+
+  /* Stacked, the equal-width trick from the script would pad words out
+     against an edge that is no longer there. */
+  .herolinks--mid .nav__link {
+    width: auto;
+    text-align: center;
+  }
+}
+
+/* Works project overlay */
+.project-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: none;
+  overflow: hidden;
+  background: transparent;
+}
+
+.project-overlay.is-open {
+  display: block;
+}
+
+.project-overlay.is-closing {
+  pointer-events: none;
+}
+
+.project-overlay.is-settled {
+  background: #000;
+  overflow-y: auto;
+}
+
+.project-overlay {
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.project-overlay::-webkit-scrollbar {
+  display: none;
+}
+
+.project__hero {
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.project-overlay.is-settled .project-overlay__frame {
+  position: absolute;
+  transition: none;
+  will-change: auto;
+}
+
+.project__details {
+  display: grid;
+  gap: clamp(24px, 5vw, 72px);
+  padding: clamp(24px, 5vw, 72px) clamp(16px, 5vw, 72px) 100px;
+  color: #fff;
+}
+
+.project__detail {
+  position: relative;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.project__details--pairs {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(12px, 2vw, 28px);
+  /* Both columns take the height of the taller one, so that whatever the
+     shorter is missing becomes space it can hand out - see the column rule
+     below. */
+  align-items: stretch;
+}
+
+.project__detail > img,
+.project__detail > video {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #151515;
+  object-fit: contain;
+}
+
+.project__detail > .media-picture {
+  position: relative;
+  display: block;
+}
+
+.project__detail > .media-picture > img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: #151515;
+  object-fit: contain;
+}
+
+.project__detail > video {
+  aspect-ratio: 4 / 3;
+  max-height: 85vh;
+}
+
+.project__details--pairs .project__detail--intro {
+  grid-column: 1 / -1;
+  width: min(100%, 440px, 38.33vh);
+}
+
+.project__detail--intro > video {
+  aspect-ratio: 23 / 45;
+}
+
+.project__details--pairs .project__detail--full {
+  grid-column: 1 / -1;
+}
+
+.project__detail-column {
+  display: grid;
+  gap: inherit;
+  min-width: 0;
+  align-content: start;
+}
+
+.project-overlay[data-project="style-rare"] .project__details {
+  gap: clamp(16px, 2vw, 28px);
+}
+
+.project-overlay[data-project="style-rare"] .project__detail-column {
+  gap: clamp(16px, 2vw, 28px);
+  align-content: start;
+}
+
+.project__detail-column--left { grid-column: 1; }
+.project__detail-column--right { grid-column: 2; }
+
+.project__detail figcaption {
+  display: none !important;
+}
+
+.project-overlay[data-project="jordan"] .project__detail figcaption {
+  display: none !important;
+}
+
+.project__detail-link.project__youtube-cover {
+  position: relative;
+  display: block;
+  width: 100vw;
+  max-width: none;
+  height: 100vh;
+  max-height: none;
+  margin-left: 50%;
+  transform: translateX(-50%);
+  overflow: hidden;
+  background: #000;
+  cursor: pointer;
+  border: 0;
+  padding: 0;
+}
+
+.project__detail-link.project__youtube-cover img,
+.project__detail-link.project__youtube-cover iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  border: 0;
+  background: #000;
+}
+
+.project__detail-link.project__youtube-cover::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: clamp(78px, 8vw, 118px);
+  height: clamp(48px, 5vw, 74px);
+  transform: translate(-50%, -50%);
+  border-radius: 14px;
+  background: #ff0033;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.28);
+  z-index: 1;
+}
+
+.project__detail-link.project__youtube-cover::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform: translate(-18%, -50%);
+  border-left: 22px solid #fff;
+  border-top: 14px solid transparent;
+  border-bottom: 14px solid transparent;
+  z-index: 2;
+}
+
+.project__detail-link.project__youtube-cover.is-playing::before,
+.project__detail-link.project__youtube-cover.is-playing::after {
+  display: none;
+}
+
+.project__detail-link.project__youtube-cover iframe {
+  position: absolute;
+  inset: 0;
+}
+
+.project__media-status {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  gap: 12px;
+  justify-items: center;
+  text-align: center;
+  color: #fff;
+  font: 14px/1.5 "Helvetica Neue LV", sans-serif;
+  text-shadow: 0 1px 4px #000;
+  pointer-events: none;
+}
+
+.project__media-status button,
+.project__image-retry {
+  pointer-events: auto;
+  border: 1px solid #fff;
+  border-radius: 3px;
+  padding: 12px 18px;
+  background: #151515;
+  color: #fff;
+  cursor: pointer;
+}
+
+.project__media-status button[hidden],
+.project__image-retry[hidden] { display: none; }
+
+.project__image-retry {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.project-open .works__stage,
+.project-open .herolinks--mid {
+  pointer-events: none;
+}
+
+.project-open .herolinks--mid {
+  opacity: 0;
+}
+
+.project-overlay__frame {
+  position: fixed;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  background: #000;
+  contain: paint;
+  border-radius: 10px;
+  will-change: left, top, width, height;
+  transition: left 0.95s cubic-bezier(0.76, 0, 0.24, 1), top 0.95s cubic-bezier(0.76, 0, 0.24, 1), width 0.95s cubic-bezier(0.76, 0, 0.24, 1), height 0.95s cubic-bezier(0.76, 0, 0.24, 1), border-radius 0.95s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.project-overlay__frame.is-expanded {
+  left: 0 !important;
+  top: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  border-radius: 0;
+}
+
+.project-overlay__frame > .panel__img,
+.project-overlay__frame > .media-picture > .panel__img,
+.project-overlay__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.project-overlay__frame > .panel__img,
+.project-overlay__frame > .media-picture > .panel__img {
+  opacity: 1;
+  object-position: center center;
+}
+
+.project-overlay__video {
+  opacity: 0;
+  transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.project-overlay__video.is-ready {
+  opacity: 1;
+}
+
+.project__info {
+  position: absolute;
+  z-index: 2;
+  left: clamp(14px, 1vw, 16px);
+  bottom: clamp(12px, 2.5vh, 24px);
+  width: min(620px, calc(100vw - 30px));
+  color: #fff;
+  mix-blend-mode: difference;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.project__info.is-revealed {
+  opacity: 1;
+}
+
+.project__rule {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 13px 12px 15px;
+  font-family: "Helvetica Neue LV", sans-serif;
+  font-size: clamp(12px, 1.35vw, 18px);
+  font-weight: 300;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.project__rule::before,
+.project__rule::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: #fff;
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.project__rule::before {
+  top: 0;
+}
+
+.project__rule::after {
+  bottom: 0;
+}
+
+.project__info.is-revealed .project__rule::before,
+.project__info.is-revealed .project__rule::after {
+  animation: project-rule-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.project__word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.8em);
+}
+
+.project__info.is-revealed .project__word {
+  animation: project-word-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation-delay: var(--word-delay, 0s);
+}
+
+@keyframes project-rule-in {
+  to { transform: scaleX(1); }
+}
+
+@keyframes project-word-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.project__info h1 {
+  margin: 12px 0 7px;
+  font-family: "Helvetica Neue LV", sans-serif;
+  font-size: clamp(42px, 4.2vw, 72px);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: 0;
+  transform: scaleX(1.12);
+  transform-origin: left center;
+}
+
+.project__credit {
+  font-family: "Helvetica Neue LV", sans-serif;
+  font-size: clamp(12px, 1.35vw, 18px);
+  font-weight: 300;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.project__info p {
+  margin: 0;
+  font-family: "Helvetica Neue LV", sans-serif;
+  font-size: clamp(12px, 1.35vw, 18px);
+  font-weight: 300;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.project__close {
+  position: fixed;
+  top: clamp(16px, 1.8vw, 24px);
+  left: clamp(16px, 1.8vw, 24px);
+  z-index: 2;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  mix-blend-mode: difference;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.project__switch {
+  position: fixed;
+  top: clamp(16px, 1.8vw, 24px);
+  right: clamp(16px, 2vw, 30px);
+  z-index: 2;
+  display: flex;
+  gap: clamp(24px, 3vw, 46px);
+  mix-blend-mode: difference;
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.project__switch button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  font-family: "Helvetica Neue LV", sans-serif;
+  font-size: clamp(10px, 1vw, 14px);
+  font-weight: 300;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.project__switch button:hover {
+  opacity: 0.6;
+}
+
+.project-overlay.is-video-playing .project__close {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.project-overlay.is-video-playing .project__switch {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+}
+
+.project-overlay.is-open .project__close,
+.project-overlay.is-open .project__switch {
+  pointer-events: auto;
+  visibility: visible;
+}
+
+@media (max-width: 760px), (hover: none) {
+  .works .panel__frame {
+    background: #000;
+  }
+
+  .works .panel__img:not(.is-loaded) {
+    opacity: 0;
+  }
+
+  .works .panel__img.is-error {
+    display: none;
+  }
+
+  .project-overlay__frame {
+    transition: left 0.95s cubic-bezier(0.76, 0, 0.24, 1), top 0.95s cubic-bezier(0.76, 0, 0.24, 1), width 0.95s cubic-bezier(0.76, 0, 0.24, 1), height 0.95s cubic-bezier(0.76, 0, 0.24, 1), border-radius 0.95s cubic-bezier(0.76, 0, 0.24, 1);
+  }
+
+  .project-overlay__frame.is-expanded {
+    left: 0 !important;
+    top: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+  }
+}
+
+@media (min-width: 761px) and (hover: hover) {
+  .project__switch {
+    top: auto;
+    bottom: clamp(30px, 4.5vh, 48px);
+    right: clamp(46px, 3.2vw, 52px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-overlay .project-overlay__frame,
+  .project-overlay__video { transition: none; }
+}
+
+@media (max-width: 760px), (hover: none) {
+  .works__stage {
+    perspective: none;
+  }
+
+  .works__track {
+    transform-style: flat;
+  }
+
+  .works .panel {
+    will-change: auto;
+  }
+}
+
+/* The tile is the square. The row track is sized from this, so a portrait
+   video thumb and a landscape picture thumb occupy an identical slot and the
+   two folders lay out the same way. */
+.home-gallery__item {
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 9px;
+  /* Opaque, so a thumbnail that has not decoded yet reads as a solid slot
+     instead of the window showing through. */
+  background: #141414;
+  cursor: pointer;
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.home-gallery__item:hover,
+.home-gallery__item:focus-visible {
+  border-color: rgba(255, 255, 255, 0.7);
+  outline: none;
+  transform: translateY(-3px);
+}
+
+/* Shown as taken: full colour, full opacity, no wash over it. */
+.home-gallery__item img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  opacity: 1;
+}
+
+@container (max-width: 560px) {
+  .home-gallery__body { grid-template-columns: 112px minmax(0, 1fr); }
+  .home-gallery__content { padding: 16px 12px; }
+  .home-gallery__sidebar { padding: 18px 10px; }
+  .home-gallery__lights { display: none; }
+  .home-gallery__bar { gap: 6px; padding: 0 10px; }
+  .home-gallery__media-frame { grid-template-columns: minmax(0, 1fr); }
+  .home-gallery__media-side { display: none; }
+  .home-gallery__media-stage { padding: 12px 32px; }
+  .home-gallery__media-arrow--prev { left: 6px; }
+  .home-gallery__media-arrow--next { right: 6px; }
+}
+
+@media (max-width: 760px), (hover: none) {
+  .sheet {
+    padding: 0;
+    background: rgba(0, 0, 0, 0.38);
+  }
+}

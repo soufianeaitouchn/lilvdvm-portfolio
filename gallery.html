@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>lilvdvm&copy;</title>
+  <!-- The tab icon: the v of the wordmark, in its own face, with no background.
+       The SVG turns black or white with the browser theme; the .ico is for
+       browsers that cannot use it. The home-screen icon keeps its black. -->
+  <link rel="icon" href="favicon.ico?v=2" sizes="32x32">
+  <link rel="icon" href="favicon.svg?v=2" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="pics/icons/icon-180.png">
+  <link rel="preload" href="fonts/HelveticaNeue/MonumentExtended-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/HelveticaNeue/HelveticaNeueLight.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/style.css?v=20261122-woff2">
+  <noscript><style>.loader { display: none; }</style></noscript>
+  <script>
+    /* Decide before anything paints: the loader is only for arriving at the
+       site, never for moving around inside it. A navigation that came from our
+       own origin is a click on our own nav; anything else - a pasted link, a
+       bookmark, a search result, a typed URL - is an arrival. */
+    (function () {
+      var from = document.referrer;
+      var internal = false;
+      try {
+        internal = !!from && new URL(from).origin === location.origin;
+      } catch (e) {}
+
+      /* A refresh counts as arriving too. */
+      var reloaded = false;
+      try {
+        var nav = performance.getEntriesByType("navigation")[0];
+        reloaded = nav
+          ? nav.type === "reload"
+          : !!(performance.navigation && performance.navigation.type === 1);
+      } catch (e) {}
+
+      // Consume the clicked destination once; this also works without a referrer.
+      try {
+        var key = "lilvdvm:internal-navigation";
+        var pending = JSON.parse(sessionStorage.getItem(key) || "null");
+        sessionStorage.removeItem(key);
+        if (pending && pending.destination === location.pathname + location.search &&
+            Date.now() - pending.time >= 0 && Date.now() - pending.time < 15000) internal = true;
+      } catch (e) {}
+
+      if (!internal || reloaded) document.documentElement.classList.add("has-loader");
+
+      /* Arrived by the slide from another page: its black has already come up
+         on the way in. A reload is an arrival of its own. */
+      try {
+        var slide = JSON.parse(sessionStorage.getItem("lilvdvm:arrive") || "null");
+        sessionStorage.removeItem("lilvdvm:arrive");
+        if (slide && slide.how === "slide" && !reloaded &&
+            Date.now() - slide.time >= 0 && Date.now() - slide.time < 15000) {
+          document.documentElement.classList.add("arrive-slide");
+          if (slide.mid !== true) document.documentElement.classList.add("arrive-nav-fade");
+          if (slide.blur) document.documentElement.classList.add("arrive-blur");
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <div class="loader" aria-hidden="true">
+    <div class="loader__curtain loader__curtain--top"></div>
+    <div class="loader__band">
+      <div class="loader__fill"></div>
+      <span class="loader__label">Loading ...</span>
+    </div>
+    <div class="loader__curtain loader__curtain--bottom"></div>
+  </div>
+
+  <!-- The wall: every photograph at once, in uneven tiles; a tap opens one
+       full screen. Built by js/gallery-wall.js. -->
+  <main class="page wall-page" aria-label="Gallery">
+    <h1 class="wall-page__title">Gallery</h1>
+    <div class="wall" data-wall></div>
+  </main>
+  <!-- The same centre row as every other page. -->
+  <nav class="herolinks herolinks--mid" aria-label="Main">
+    <a class="nav__link" href="gallery.html">GALLERY</a>
+    <a class="nav__link" href="works.html">WORKS</a>
+    <a class="logo herolinks__logo" href="index.html">lilvdvm<span class="logo__mark">&#x24B8;</span></a>
+    <a class="nav__link" href="infos.html">INFOS</a>
+    <a class="nav__link" href="contact.html">CONTACT</a>
+  </nav>
+
+  <script src="js/vendor/lenis.min.js"></script>
+  <script src="js/smooth.js?v=20261031-lerp"></script>
+  <script src="js/loader.js?v=20261121-clean"></script>
+  <script src="js/nav.js?v=20261031-table"></script>
+  <script src="js/slide.js?v=20261031-vanishblur"></script>
+  <script src="js/gallery-data.js?v=20261122-20"></script>
+  <script src="js/scramble.js?v=20261031-motion"></script>
+  <script src="js/gallery-wall.js?v=20261122-top"></script>
+  <script src="js/cursor.js?v=20261121-wall"></script>
+</body>
+</html>

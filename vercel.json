@@ -1,0 +1,30 @@
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'sha256-W7BSKe7oVoDOsZWUjrPuHhrpnMBgIdi5byCWEPzzd+c=' 'sha256-zgQr2NZ6DmPsYjBE8X6rGKdEI9pA/glOM7zG4CstL3Q=' 'sha256-qqDSmuYXm/lsUR+eJoKe4AG4EQW6g6ieX/XELEiQ9o0=' 'sha256-DpPH1EDk6w3Qgr7N5oySlpMD3jj8AwanW9W+7Qioz/I=' 'sha256-D+IA+jvRfOvw9igY2BfxmX+NSZLaNp9Hq82SQG0kBRY='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self' https://api.web3forms.com; frame-src https://www.youtube.com https://www.youtube-nocookie.com; form-action 'self' https://api.web3forms.com; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests"
+        },
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), payment=(), usb=()" },
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" }
+      ]
+    },
+    {
+      "source": "/favicon.(svg|ico)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/(css|js|fonts|pics)/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=600, stale-while-revalidate=604800" }
+      ]
+    }
+  ]
+}

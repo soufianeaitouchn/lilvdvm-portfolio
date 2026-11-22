@@ -1,0 +1,47 @@
+# Camera masters. Nothing on the site loads them: the pages serve the
+# compressed .web.mp4 copies, which ARE tracked. Keep these safe locally (or
+# put the repo on Git LFS if they need to live alongside the code).
+#
+# The first three are each past GitHub's 100MB limit for a single file - a push
+# fails outright with them included. sos.mp4 is under it, but it is a master
+# like the others and there is no reason to carry sixty megabytes of it when
+# what the page loads is five.
+video/x3_1.mp4
+video/reel 011.mp4
+video/x4.mp4
+video/sos.mp4
+
+# Source material: the shoots the site is drawn from, and a transfer dump.
+# Several gigabytes between them, and nothing here serves any of it - what the
+# pages load are the copies in pics/ and video/. Named so that a stray add
+# cannot sweep them into the history, which is not something a repository
+# recovers from easily.
+portfolio/
+transfer-01a06f70/
+
+# Editor and OS noise
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Local scratch
+.tools/
+*.log
+.claude*
+
+# Node. package.json is tracked so the Puppeteer-based checks can be set up
+# again with one install; the installed tree itself has no business in here.
+node_modules/
+
+# Python bytecode from scripts/build-works-media.py
+__pycache__/
+*.pyc
+
+# Throwaway verification harnesses and the screenshots they leave behind.
+# They drive a local server with Puppeteer and are not part of the site.
+verify-*.mjs
+tmp-*
+shot-*.png
+
+# Files taken out of the site during the cleanup, kept locally only.
+_archive/

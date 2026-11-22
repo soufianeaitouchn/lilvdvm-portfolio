@@ -1,0 +1,26 @@
+{
+  "name": "lilvdvm-portfolio-website",
+  "version": "1.0.0",
+  "description": "LILVDVM Portfolio Website",
+  "private": true,
+  "scripts": {
+    "test": "node scripts/verify-media.mjs",
+    "test:media": "node scripts/verify-media.mjs",
+    "test:navigation": "node scripts/verify-navigation.mjs"
+  },
+  "devDependencies": {
+    "puppeteer": "25.11.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/soufianeaitouchn/LILVDVMPortfolioWebsite.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/soufianeaitouchn/LILVDVMPortfolioWebsite/issues"
+  },
+  "homepage": "https://github.com/soufianeaitouchn/LILVDVMPortfolioWebsite#readme"
+}

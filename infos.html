@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>lilvdvm&copy;</title>
+  <!-- The tab icon: the v of the wordmark, in its own face, with no background.
+       The SVG turns black or white with the browser theme; the .ico is for
+       browsers that cannot use it. The home-screen icon keeps its black. -->
+  <link rel="icon" href="favicon.ico?v=2" sizes="32x32">
+  <link rel="icon" href="favicon.svg?v=2" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="pics/icons/icon-180.png">
+  <link rel="preload" href="fonts/HelveticaNeue/MonumentExtended-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/HelveticaNeue/HelveticaNeueLight.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/style.css?v=20261122-woff2">
+  <noscript><style>.loader { display: none; }</style></noscript>
+  <script>
+    /* Decide before anything paints: the loader is only for arriving at the
+       site, never for moving around inside it. A navigation that came from our
+       own origin is a click on our own nav; anything else - a pasted link, a
+       bookmark, a search result, a typed URL - is an arrival. */
+    (function () {
+      var from = document.referrer;
+      var internal = false;
+      try {
+        internal = !!from && new URL(from).origin === location.origin;
+      } catch (e) {}
+
+      /* A refresh counts as arriving too. Reloading keeps whatever referrer the
+         page was opened with, so a page reached from our own nav and then
+         refreshed still looks internal - the navigation type is the only thing
+         that tells them apart. */
+      var reloaded = false;
+      try {
+        var nav = performance.getEntriesByType("navigation")[0];
+        reloaded = nav
+          ? nav.type === "reload"
+          : !!(performance.navigation && performance.navigation.type === 1);
+      } catch (e) {}
+
+      // Consume the clicked destination once; this also works without a referrer.
+      try {
+        var key = "lilvdvm:internal-navigation";
+        var pending = JSON.parse(sessionStorage.getItem(key) || "null");
+        sessionStorage.removeItem(key);
+        if (pending && pending.destination === location.pathname + location.search &&
+            Date.now() - pending.time >= 0 && Date.now() - pending.time < 15000) internal = true;
+      } catch (e) {}
+
+      if (!internal || reloaded) document.documentElement.classList.add("has-loader");
+
+      /* Arrived by the slide from another page: this page's opening frame has
+         already come up on the way in, so there is no fade off black to play.
+         If the page left had its links somewhere else, they fade in here rather
+         than appear. A reload is an arrival of its own. */
+      try {
+        var slide = JSON.parse(sessionStorage.getItem("lilvdvm:arrive") || "null");
+        sessionStorage.removeItem("lilvdvm:arrive");
+        if (slide && slide.how === "slide" && !reloaded &&
+            Date.now() - slide.time >= 0 && Date.now() - slide.time < 15000) {
+          document.documentElement.classList.add("arrive-slide");
+          if (slide.mid !== true) document.documentElement.classList.add("arrive-nav-fade");
+          if (slide.blur) document.documentElement.classList.add("arrive-blur");
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="preload" href="pics/videoframe0.webp" as="image">
+  <noscript><style>.infos__veil { display: none; }</style></noscript>
+</head>
+<body>
+  <div class="loader" aria-hidden="true">
+    <div class="loader__curtain loader__curtain--top"></div>
+    <div class="loader__band">
+      <div class="loader__fill"></div>
+      <span class="loader__label">Loading ...</span>
+    </div>
+    <div class="loader__curtain loader__curtain--bottom"></div>
+  </div>
+
+  <main class="page page--infos">
+    <section class="infos">
+      <div class="infos__stage">
+        <video class="infos__video"
+               data-src="video/videopage.web.mp4"
+               poster="pics/videoframe0.webp"
+               data-contrast-source
+               width="1920" height="1080"
+               muted
+               playsinline
+               webkit-playsinline
+               preload="auto"
+               disablepictureinpicture
+               disableremoteplayback
+               tabindex="-1"
+               aria-hidden="true"></video>
+
+        <div class="infos__veil"></div>
+
+        <p class="infos__cue"><span>Scroll to see more</span></p>
+
+        <!-- Four steps, each a title above the row of links and its paragraph
+             below it. They take turns in the same place as the page scrolls. -->
+        <div class="infos__copy">
+          <article class="infos__step">
+            <h2 class="infos__head"><span class="infos__num">01 / 04</span><span class="infos__title">Who I am</span></h2>
+            <p class="infos__text">My name is <em>Adam Boulghal</em>, a Moroccan filmmaker, editor, and cinema student based in Ouarzazate. I&rsquo;m also a member of the <em>Avision crew</em>, a visual production company.</p>
+          </article>
+          <article class="infos__step">
+            <h2 class="infos__head"><span class="infos__num">02 / 04</span><span class="infos__title">How it started</span></h2>
+            <p class="infos__text">I started working in filmmaking around three years ago, exploring different sides of visual creation, from editing and VFX to 3D and filmmaking.</p>
+          </article>
+          <article class="infos__step">
+            <h2 class="infos__head"><span class="infos__num">03 / 04</span><span class="infos__title">What I&rsquo;ve made</span></h2>
+            <p class="infos__text">Since then, I&rsquo;ve worked on more than 100 projects, including commercials, music videos, promotional content, short films, and other visual projects.</p>
+          </article>
+          <article class="infos__step">
+            <h2 class="infos__head"><span class="infos__num">04 / 04</span><span class="infos__title">Why I do it</span></h2>
+            <p class="infos__text">I love experimenting, trying new techniques, and turning ideas into something people can actually see and experience.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- The same centre row as the home page and Works, held in the middle of
+       the screen the whole way down. Plain white rather than inverted: the
+       film here is mostly a middle grey, which an inverted row disappears into. -->
+  <nav class="herolinks herolinks--mid herolinks--plain" aria-label="Main">
+    <a class="nav__link" href="gallery.html">GALLERY</a>
+    <a class="nav__link" href="works.html">WORKS</a>
+    <a class="logo herolinks__logo" href="index.html">lilvdvm<span class="logo__mark">&#x24B8;</span></a>
+    <a class="nav__link" href="infos.html">INFOS</a>
+    <a class="nav__link" href="contact.html">CONTACT</a>
+  </nav>
+
+  <script src="js/vendor/lenis.min.js"></script>
+  <script src="js/smooth.js?v=20261031-lerp"></script>
+  <script src="js/loader.js?v=20261121-clean"></script>
+  <script src="js/infos.js?v=20261101-five"></script>
+  <script src="js/nav.js?v=20261031-table"></script>
+  <script src="js/slide.js?v=20261031-vanishblur"></script>
+  <script src="js/cursor.js?v=20261121-wall"></script>
+</body>
+</html>

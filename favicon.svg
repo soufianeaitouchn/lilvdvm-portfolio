@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="80 79.5 352 352">
+  <!-- The v of the wordmark, traced from Monument Extended. No background:
+       black on a light browser theme, white on a dark one. -->
+  <style>
+    path { fill: #000; }
+    @media (prefers-color-scheme: dark) { path { fill: #fff; } }
+  </style>
+  <path d="M88 138H164L256 324L348 138H424L305 373H206Z"/>
+</svg>
